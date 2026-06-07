@@ -12,6 +12,7 @@ import { QuickMetrics } from "@/components/modules/dashboard/QuickMetrics";
 import { AlertsFeed } from "@/components/modules/dashboard/AlertsFeed";
 import { useDailyReport, useHealth, usePaperTrades } from "@/hooks/useData";
 import { deriveKpis } from "@/lib/derive";
+import { API_BASE_URL } from "@/lib/api";
 
 export default function DashboardPage() {
   const { data: trades, isLoading } = usePaperTrades({ limit: 200 }, 10_000);
@@ -39,7 +40,7 @@ export default function DashboardPage() {
             <AlertTriangle className="h-5 w-5 shrink-0 text-neon-amber" />
             <p className="font-mono text-xs text-neon-amber">
               {offline
-                ? "Backend no responde en http://localhost:8080 — levanta la API (uvicorn) para ver datos en vivo."
+                ? `Backend no responde en ${API_BASE_URL} — verifica NEXT_PUBLIC_API_URL y que la API este activa.`
                 : "Backend OK pero la base de datos está offline — inicia Postgres (docker compose up) y aplica migraciones."}
             </p>
           </div>

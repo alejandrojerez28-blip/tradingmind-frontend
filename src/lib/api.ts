@@ -10,8 +10,15 @@ import type {
   TriggerScanResponse,
 } from "./types";
 
+const configuredApiUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+const browserFallbackApiUrl =
+  typeof window !== "undefined" ? window.location.origin : undefined;
+
+export const API_BASE_URL =
+  configuredApiUrl || browserFallbackApiUrl || "http://localhost:8080";
+
 export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080",
+  baseURL: API_BASE_URL,
   timeout: 10000,
 });
 
