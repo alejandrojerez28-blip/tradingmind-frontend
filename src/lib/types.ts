@@ -148,6 +148,18 @@ export interface HealthResponse {
   redis: string;
 }
 
+export interface ReadinessResponse {
+  status: "ready" | "not_ready";
+  service: string;
+  environment: string;
+  checks: {
+    database_ok: boolean;
+    redis_ok: boolean;
+    critical_api_key_configured: boolean;
+    scheduler_ok: boolean;
+  };
+}
+
 export interface JournalEntry {
   id: string;
   created_at: string;

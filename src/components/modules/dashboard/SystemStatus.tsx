@@ -13,6 +13,7 @@ export function SystemStatus() {
   const { data } = useSchedulerStatus();
   const scan = useTriggerScan();
   const monitor = useMonitorPositions();
+  const schedulerRunning = useSystemStore((s) => s.schedulerRunning);
   const pushEvent = useSystemStore((s) => s.pushEvent);
 
   function runScan() {
@@ -41,8 +42,8 @@ export function SystemStatus() {
         title="Sistema"
         right={
           <StatusPill
-            tone={data?.running ? "green" : "amber"}
-            label={data?.running ? "SCHEDULER ON" : "SCHEDULER OFF"}
+            tone={schedulerRunning ? "green" : "amber"}
+            label={schedulerRunning ? "SCHEDULER ON" : "SCHEDULER OFF"}
           />
         }
       />

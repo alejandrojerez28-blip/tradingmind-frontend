@@ -3,6 +3,7 @@ import type {
   DailyReport,
   EvaluationScorecard,
   HealthResponse,
+  ReadinessResponse,
   NoTradeJournalEntry,
   PaperTrade,
   ScorecardSummary,
@@ -11,16 +12,31 @@ import type {
 } from "./types";
 
 const configuredApiUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
-const browserFallbackApiUrl =
-  typeof window !== "undefined" ? window.location.origin : undefined;
+const configuredCriticalApiKey = process.env.NEXT_PUBLIC_CRITICAL_API_KEY?.trim();
 
-export const API_BASE_URL =
-  configuredApiUrl || browserFallbackApiUrl || "http://localhost:8080";
+function normalizeApiBaseUrl(rawUrl: string): string {
+  const clean = rawUrl.trim().replace(/\/+$/, "");
+  if (clean.endsWith("/api")) {
+    return clean;
+  }
+  return `${clean}/api`;
+}
+
+const browserFallbackApiUrl =
+  typeof window !== "undefined" ? `${window.location.origin}/api` : undefined;
+
+export const API_BASE_URL = configuredApiUrl
+  ? normalizeApiBaseUrl(configuredApiUrl)
+  : browserFallbackApiUrl || "http://localhost:8080";
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
 });
+
+if (configuredCriticalApiKey) {
+  api.defaults.headers.common["X-API-Key"] = configuredCriticalApiKey;
+}
 
 // ── Scheduler ──────────────────────────────────────────
 export const getSchedulerStatus = () =>
@@ -85,6 +101,8 @@ export const getNoTradeJournal = (params?: {
 
 // ── Health ─────────────────────────────────────────────
 export const getHealth = () => api.get<HealthResponse>("/health").then((r) => r.data);
+export const getReadiness = () =>
+  api.get<ReadinessResponse>("/ready").then((r) => r.data);
 
 export const WATCHLIST_DEFAULT = [
   "SPY",

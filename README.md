@@ -18,7 +18,8 @@ cp .env.example .env.local
 2. Ajusta `NEXT_PUBLIC_API_URL`:
 
 - Local backend con Docker: `http://localhost:8080`
-- Backend en DigitalOcean: `https://<tu-backend-do>`
+- Backend en DigitalOcean/App Router: `https://<tu-dominio>/api` (si pones dominio sin `/api`, el frontend lo normaliza automaticamente)
+- Opcional en despliegue privado: `NEXT_PUBLIC_CRITICAL_API_KEY=<tu-key>` para que el panel pueda consultar endpoints protegidos de scheduler.
 
 ## Desarrollo local
 
@@ -44,3 +45,4 @@ npm run start
 - Run command: `npm run start`
 - Variables (Run):
   - `NEXT_PUBLIC_API_URL=https://<backend-url>`
+  - `NEXT_PUBLIC_CRITICAL_API_KEY=<critical-key>` (opcional, solo dashboard privado)

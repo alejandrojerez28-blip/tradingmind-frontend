@@ -6,6 +6,7 @@ import {
   getDailyReport,
   getDailyReportHistory,
   getHealth,
+  getReadiness,
   getNoTradeJournal,
   getPaperTrades,
   getScorecard,
@@ -76,6 +77,15 @@ export function useHealth() {
     queryKey: ["health"],
     queryFn: getHealth,
     refetchInterval: 15_000,
+    retry: 0,
+  });
+}
+
+export function useReadiness() {
+  return useQuery({
+    queryKey: ["readiness"],
+    queryFn: getReadiness,
+    refetchInterval: 20_000,
     retry: 0,
   });
 }
