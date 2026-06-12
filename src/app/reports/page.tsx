@@ -9,13 +9,14 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 import { NeonBadge } from "@/components/ui/NeonBadge";
 import { DataNumber } from "@/components/ui/DataNumber";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { useDailyReport, useDailyReportHistory } from "@/hooks/useData";
+import { useDailyReport, useDailyReportHistory, useWeeklyLearningReport } from "@/hooks/useData";
 import { formatPnl, formatPrice } from "@/lib/utils";
 
 export default function ReportsPage() {
   const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined);
   const { data: report, isLoading } = useDailyReport(selectedDate);
   const { data: history } = useDailyReportHistory(14);
+  const { data: weeklyLearning } = useWeeklyLearningReport(7);
 
   return (
     <motion.div
@@ -161,6 +162,22 @@ export default function ReportsPage() {
                 </p>
                 <p className="mt-2 whitespace-pre-line font-mono text-xs leading-relaxed text-ink">
                   {report.notes}
+                </p>
+              </NeonCard>
+            )}
+
+            {weeklyLearning && (
+              <NeonCard>
+                <p className="font-mono text-[10px] uppercase tracking-widest text-neon-cyan">
+                  Learning semanal ({weeklyLearning.window_days}d)
+                </p>
+                <p className="mt-2 font-mono text-xs text-ink">
+                  Win-rate {weeklyLearning.kpis.win_rate_pct.toFixed(2)}% · Net PnL{" "}
+                  {formatPnl(weeklyLearning.kpis.net_pnl)} · Reject rate{" "}
+                  {weeklyLearning.kpis.broker_reject_rate_pct.toFixed(2)}%
+                </p>
+                <p className="mt-2 whitespace-pre-line font-mono text-[11px] text-muted">
+                  {weeklyLearning.learning_actions.join(" ")}
                 </p>
               </NeonCard>
             )}

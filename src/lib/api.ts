@@ -4,6 +4,7 @@ import type {
   DailyReport,
   EvaluationScorecard,
   HealthResponse,
+  LearningWeeklyReport,
   ProposalsGenerateResponse,
   ReadinessResponse,
   NoTradeJournalEntry,
@@ -106,6 +107,13 @@ export const getDailyReport = (reportDate?: string) =>
 export const getDailyReportHistory = (limit = 14) =>
   api
     .get<DailyReport[]>("/reports/daily/history", { params: { limit } })
+    .then((r) => r.data);
+
+export const getWeeklyLearningReport = (windowDays = 7) =>
+  api
+    .get<LearningWeeklyReport>("/reports/learning/weekly", {
+      params: { window_days: windowDays },
+    })
     .then((r) => r.data);
 
 // ── No-Trade Journal ───────────────────────────────────

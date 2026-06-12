@@ -50,6 +50,10 @@ export interface InvestmentProposal {
   ticker: string;
   proposal_status: "PROPOSED" | "BLOCKED";
   reason_code: string | null;
+  decision_hint?: "PROPOSE" | "WATCH" | "AVOID";
+  alpha_score?: number;
+  confidence?: number;
+  reason_codes?: string[];
   authorizable: boolean;
   setup_type?: string;
   option_type?: string;
@@ -60,6 +64,10 @@ export interface InvestmentProposal {
   target_price?: number;
   liquidity_score?: number;
   volume_relative?: number;
+  news_impact_score?: number;
+  execution_quality_score?: number;
+  expected_return_pct?: number;
+  expected_drawdown_pct?: number;
   market_data_source?: string;
   market_data_timestamp?: string;
 }
@@ -70,6 +78,7 @@ export interface ProposalsGenerateResponse {
   total: number;
   proposed: number;
   blocked: number;
+  ready_for_authorization?: number;
   proposals: InvestmentProposal[];
 }
 
@@ -159,6 +168,22 @@ export interface DailyReport {
   discipline_score: number;
   entries: DailyReportEntry[];
   notes: string;
+}
+
+export interface LearningWeeklyReport {
+  generated_at: string;
+  window_days: number;
+  kpis: {
+    trades_total: number;
+    trades_closed: number;
+    blocked_decisions: number;
+    broker_audits: number;
+    win_rate_pct: number;
+    avg_pnl: number;
+    net_pnl: number;
+    broker_reject_rate_pct: number;
+  };
+  learning_actions: string[];
 }
 
 export interface NoTradeJournalEntry {

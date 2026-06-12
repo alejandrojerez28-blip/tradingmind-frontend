@@ -8,6 +8,7 @@ import {
   getDailyReport,
   getDailyReportHistory,
   getHealth,
+  getWeeklyLearningReport,
   getReadiness,
   getNoTradeJournal,
   getPaperTrades,
@@ -60,6 +61,13 @@ export function useDailyReportHistory(limit = 14) {
   return useQuery({
     queryKey: ["daily-report-history", limit],
     queryFn: () => getDailyReportHistory(limit),
+  });
+}
+
+export function useWeeklyLearningReport(windowDays = 7) {
+  return useQuery({
+    queryKey: ["weekly-learning-report", windowDays],
+    queryFn: () => getWeeklyLearningReport(windowDays),
   });
 }
 
