@@ -1,8 +1,10 @@
 import axios from "axios";
 import type {
+  AuthorizeSimulateResponse,
   DailyReport,
   EvaluationScorecard,
   HealthResponse,
+  ProposalsGenerateResponse,
   ReadinessResponse,
   NoTradeJournalEntry,
   PaperTrade,
@@ -44,6 +46,24 @@ export const getSchedulerStatus = () =>
 
 export const triggerScan = () =>
   api.post<TriggerScanResponse>("/scheduler/trigger-scan").then((r) => r.data);
+
+export const generateInvestmentProposals = (params?: {
+  simulated_capital?: number;
+  tickers?: string;
+}) =>
+  api
+    .post<ProposalsGenerateResponse>("/scheduler/proposals/generate", undefined, { params })
+    .then((r) => r.data);
+
+export const authorizeAndSimulateProposal = (params: {
+  ticker: string;
+  simulated_capital?: number;
+}) =>
+  api
+    .post<AuthorizeSimulateResponse>("/scheduler/proposals/authorize-simulate", undefined, {
+      params,
+    })
+    .then((r) => r.data);
 
 // ── Paper Trades ───────────────────────────────────────
 export const getPaperTrades = (params?: {

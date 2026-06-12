@@ -4,6 +4,7 @@ import {
   ClipboardList,
   Eye,
   FileText,
+  Lightbulb,
   LayoutDashboard,
   Briefcase,
   type LucideIcon,
@@ -18,6 +19,7 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/watchlist", label: "Watchlist", icon: Eye },
+  { href: "/proposals", label: "Propuestas", icon: Lightbulb },
   { href: "/portfolio", label: "Portfolio", icon: Briefcase },
   { href: "/scorecard", label: "Scorecard", icon: BarChart3 },
   { href: "/reports", label: "Reportes", icon: FileText },

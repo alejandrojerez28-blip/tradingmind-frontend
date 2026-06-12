@@ -46,6 +46,43 @@ export interface TriggerScanResponse {
   results: ScanResult[];
 }
 
+export interface InvestmentProposal {
+  ticker: string;
+  proposal_status: "PROPOSED" | "BLOCKED";
+  reason_code: string | null;
+  authorizable: boolean;
+  setup_type?: string;
+  option_type?: string;
+  option_strike?: number;
+  option_expiration?: string;
+  entry_price?: number;
+  stop_loss_price?: number;
+  target_price?: number;
+  liquidity_score?: number;
+  volume_relative?: number;
+  market_data_source?: string;
+  market_data_timestamp?: string;
+}
+
+export interface ProposalsGenerateResponse {
+  generated_at: string;
+  simulated_capital: number;
+  total: number;
+  proposed: number;
+  blocked: number;
+  proposals: InvestmentProposal[];
+}
+
+export interface AuthorizeSimulateResponse {
+  ticker: string;
+  decision: Decision;
+  reason_code: string | null;
+  paper_trade_id: number | null;
+  authorized: boolean;
+  simulated_capital: number;
+  executed_at: string;
+}
+
 export interface ScorecardSummary {
   overall_grade: string;
   total_trades: number;
