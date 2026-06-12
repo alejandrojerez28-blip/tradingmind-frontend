@@ -1,5 +1,6 @@
 import axios from "axios";
 import type {
+  AuthorizeSimulateReadyResponse,
   AuthorizeSimulateResponse,
   DailyReport,
   EvaluationScorecard,
@@ -62,6 +63,16 @@ export const authorizeAndSimulateProposal = (params: {
 }) =>
   api
     .post<AuthorizeSimulateResponse>("/scheduler/proposals/authorize-simulate", undefined, {
+      params,
+    })
+    .then((r) => r.data);
+
+export const authorizeAndSimulateReadyProposals = (params?: {
+  simulated_capital?: number;
+  tickers?: string;
+}) =>
+  api
+    .post<AuthorizeSimulateReadyResponse>("/scheduler/proposals/authorize-simulate-ready", undefined, {
       params,
     })
     .then((r) => r.data);

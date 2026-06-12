@@ -8,6 +8,7 @@ import { NeonCard } from "@/components/ui/NeonCard";
 import { GlowButton } from "@/components/ui/GlowButton";
 import { NeonBadge } from "@/components/ui/NeonBadge";
 import {
+  useAuthorizeAndSimulateReadyProposals,
   useAuthorizeAndSimulateProposal,
   useGenerateInvestmentProposals,
 } from "@/hooks/useData";
@@ -23,6 +24,7 @@ export default function ProposalsPage() {
   const [activeTicker, setActiveTicker] = useState<string | null>(null);
   const generate = useGenerateInvestmentProposals();
   const authorize = useAuthorizeAndSimulateProposal();
+  const authorizeReady = useAuthorizeAndSimulateReadyProposals();
   const pushEvent = useSystemStore((s) => s.pushEvent);
 
   const proposals = proposalsPayload?.proposals ?? [];
@@ -36,6 +38,14 @@ export default function ProposalsPage() {
         (a, b) => Number(b.alpha_score ?? 0) - Number(a.alpha_score ?? 0)
       ),
     [proposals]
+  );
+  const readyItems = useMemo(
+    () => ordered.filter((item) => item.precheck_status === "READY_TO_SIMULATE"),
+    [ordered]
+  );
+  const blockedPrecheckItems = useMemo(
+    () => ordered.filter((item) => item.precheck_status === "BLOCKED_PRECHECK"),
+    [ordered]
   );
 
   function parseError(error: unknown): string {
@@ -108,14 +118,49 @@ export default function ProposalsPage() {
     );
   }
 
+  function authorizeAndSimulateReady() {
+    authorizeReady.mutate(
+      { simulated_capital: 2500 },
+      {
+        onSuccess: (result) => {
+          setLastActionTone(result.blocked > 0 ? "warn" : "allow");
+          setLastActionMessage(
+            `Batch listo: ejecutadas ${result.executed}, ALLOW ${result.allowed}, BLOCK ${result.blocked}.`
+          );
+          pushEvent({
+            kind: result.blocked > 0 ? "WARN" : "ALLOW",
+            message: `Batch READY: ALLOW ${result.allowed} · BLOCK ${result.blocked}`,
+          });
+        },
+        onError: (error) => {
+          const message = parseError(error);
+          setLastActionTone("block");
+          setLastActionMessage(`Error en simulacion batch: ${message}`);
+          pushEvent({ kind: "BLOCK", message: `Batch READY fallo: ${message}` });
+        },
+      }
+    );
+  }
+
   return (
     <div className="space-y-5 p-5">
       <div className="flex items-center justify-between">
         <SectionHeader title="Propuestas de Inversion" className="mb-0" />
-        <GlowButton tone="cyan" size="sm" onClick={generateNow} disabled={generate.isPending}>
-          <RefreshCcw className="h-3.5 w-3.5" />
-          {generate.isPending ? "Analizando..." : "Generar propuestas"}
-        </GlowButton>
+        <div className="flex items-center gap-2">
+          <GlowButton
+            tone="green"
+            size="sm"
+            onClick={authorizeAndSimulateReady}
+            disabled={authorizeReady.isPending || readyItems.length === 0}
+          >
+            <CheckCircle2 className="h-3.5 w-3.5" />
+            {authorizeReady.isPending ? "Simulando READY..." : "Simular todas las READY"}
+          </GlowButton>
+          <GlowButton tone="cyan" size="sm" onClick={generateNow} disabled={generate.isPending}>
+            <RefreshCcw className="h-3.5 w-3.5" />
+            {generate.isPending ? "Analizando..." : "Generar propuestas"}
+          </GlowButton>
+        </div>
       </div>
 
       <NeonCard>
@@ -124,6 +169,8 @@ export default function ProposalsPage() {
           <span>Propuestas: {proposedCount}</span>
           <span>Bloqueadas: {proposalsPayload?.blocked ?? 0}</span>
           <span>Autorizables: {proposalsPayload?.ready_for_authorization ?? 0}</span>
+          <span>READY: {proposalsPayload?.ready_to_simulate ?? readyItems.length}</span>
+          <span>Bloq Precheck: {proposalsPayload?.blocked_precheck ?? blockedPrecheckItems.length}</span>
           <span>Capital simulado: ${proposalsPayload?.simulated_capital ?? 2500}</span>
         </div>
         {lastActionMessage && (
@@ -148,7 +195,7 @@ export default function ProposalsPage() {
           </p>
         ) : (
           <div className="divide-y divide-white/5">
-            {ordered.map((item) => (
+            {readyItems.map((item) => (
               <div key={item.ticker} className="flex items-center justify-between gap-3 px-4 py-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
@@ -162,6 +209,7 @@ export default function ProposalsPage() {
                     <NeonBadge variant={item.decision_hint === "PROPOSE" ? "allow" : "warn"}>
                       {item.decision_hint ?? "N/A"}
                     </NeonBadge>
+                    <NeonBadge variant="allow">{item.precheck_status ?? "READY_TO_SIMULATE"}</NeonBadge>
                   </div>
                   <p className="mt-1 truncate font-mono text-[11px] text-dim">
                     alpha {(item.alpha_score ?? 0).toFixed(2)} · conf {(
@@ -180,13 +228,34 @@ export default function ProposalsPage() {
                 <GlowButton
                   tone="green"
                   size="sm"
-                  disabled={!item.authorizable || authorize.isPending}
+                  disabled={!item.authorizable || authorize.isPending || authorizeReady.isPending}
                   onClick={() => authorizeAndSimulate(item)}
                 >
                   <CheckCircle2 className="h-3.5 w-3.5" />
                   {authorize.isPending && activeTicker === item.ticker
                     ? "Simulando..."
                     : "Autorizar y simular"}
+                </GlowButton>
+              </div>
+            ))}
+            {blockedPrecheckItems.map((item) => (
+              <div
+                key={`${item.ticker}-blocked`}
+                className="flex items-center justify-between gap-3 px-4 py-3 opacity-80"
+              >
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-display text-base text-ink">{item.ticker}</span>
+                    <NeonBadge variant="warn">{item.reason_code ?? "BLOCKED_PRECHECK"}</NeonBadge>
+                    <NeonBadge variant="block">{item.precheck_status ?? "BLOCKED_PRECHECK"}</NeonBadge>
+                  </div>
+                  <p className="mt-1 truncate font-mono text-[11px] text-dim">
+                    alpha {(item.alpha_score ?? 0).toFixed(2)} · conf {(item.confidence ?? 0).toFixed(2)} ·
+                    motivo {item.precheck_reason_code ?? "N/A"}
+                  </p>
+                </div>
+                <GlowButton tone="red" size="sm" disabled>
+                  No simulable
                 </GlowButton>
               </div>
             ))}

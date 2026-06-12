@@ -50,6 +50,8 @@ export interface InvestmentProposal {
   ticker: string;
   proposal_status: "PROPOSED" | "BLOCKED";
   reason_code: string | null;
+  precheck_status?: "READY_TO_SIMULATE" | "BLOCKED_PRECHECK";
+  precheck_reason_code?: string;
   decision_hint?: "PROPOSE" | "WATCH" | "AVOID";
   alpha_score?: number;
   confidence?: number;
@@ -79,6 +81,8 @@ export interface ProposalsGenerateResponse {
   proposed: number;
   blocked: number;
   ready_for_authorization?: number;
+  ready_to_simulate?: number;
+  blocked_precheck?: number;
   proposals: InvestmentProposal[];
 }
 
@@ -90,6 +94,17 @@ export interface AuthorizeSimulateResponse {
   authorized: boolean;
   simulated_capital: number;
   executed_at: string;
+}
+
+export interface AuthorizeSimulateReadyResponse {
+  generated_at: string;
+  simulated_capital: number;
+  total_candidates: number;
+  ready_to_simulate: number;
+  executed: number;
+  allowed: number;
+  blocked: number;
+  results: AuthorizeSimulateResponse[];
 }
 
 export interface ScorecardSummary {

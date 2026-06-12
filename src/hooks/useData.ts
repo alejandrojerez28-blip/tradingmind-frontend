@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  authorizeAndSimulateReadyProposals,
   authorizeAndSimulateProposal,
   closePaperTrade,
   generateInvestmentProposals,
@@ -123,6 +124,19 @@ export function useAuthorizeAndSimulateProposal() {
   return useMutation({
     mutationFn: (vars: { ticker: string; simulated_capital?: number }) =>
       authorizeAndSimulateProposal(vars),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["paper-trades"] });
+      qc.invalidateQueries({ queryKey: ["scorecard-summary"] });
+      qc.invalidateQueries({ queryKey: ["daily-report"] });
+    },
+  });
+}
+
+export function useAuthorizeAndSimulateReadyProposals() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (vars?: { simulated_capital?: number; tickers?: string }) =>
+      authorizeAndSimulateReadyProposals(vars),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["paper-trades"] });
       qc.invalidateQueries({ queryKey: ["scorecard-summary"] });
